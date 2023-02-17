@@ -275,3 +275,103 @@ Q16. Query the list of CITY names from STATION that do not start with vowels and
 vowels. Your result cannot contain duplicates.
 Ans-
 mysql> select distinct city from station_dataset where not (city rlike '^[aeiou]' or city rlike '[aeiou]$'); 
+
+
+Q-17) Write an SQL query that reports the products that were only sold in the first quarter of 2019. That is,
+between 2019-01-01 and 2019-03-31 inclusive.
+
+Ans-
+mysql> select product_id,product_name from product where product_id not in (select product_id from sales where sale_date not between '2019-01-01' and '2019-03-31');
++------------+--------------+
+| product_id | product_name |
++------------+--------------+
+|          1 | S8           |
++------------+--------------+
+1 row in set (0.00 sec)
+
+Q-18 ----
+Ans-18
+mysql>select distinct author_id as id from Views where author_id = viewer_id order by author_id asc;
+
+
+--Q-19
+Ans-
+mysql> select  round(
+      (select count(d1.delivery_id) from delivery d1 where d1.order_date = d1.customer_pref_delivery_date)*100/count(d.delivery_id),2) immedidate_order_percent 
+      from delivery d;
++--------------------------+
+| immedidate_order_percent |
++--------------------------+
+|                    33.33 |
++--------------------------+
+1 row in set (0.00 sec)
+
+mysql>select round(100*d2.immediate_orders/count(d1.delivery_id), 2) as immediate_percentage
+from Delivery d1,
+    (select count(order_date) as immediate_orders
+    from Delivery 
+    where (order_date = customer_pref_delivery_date)) d2;
+    
+    
+    
+ ---Q-20)
+ Ans-
+ mysql> select distinct a.ad_id,round(coalesce((clicks.click_count)/(clicks.click_count + views.view_count)*100,0),2) ctr 
+ from ads a 
+ left outer join 
+ (select ad_id,count(ad_id) click_count from ads where action = 'Clicked' group by ad_id) clicks on clicks.ad_id = a.ad_id
+ left outer join 
+ (select ad_id ,count(ad_id) view_count from ads where action = 'Viewed' group by ad_id) views on views.ad_id = a.ad_id order by ctr desc,ad_id asc;
+ 
+mysql> select ad_id,
+ifnull(
+    round(
+        avg(
+            case
+                when action = "Clicked" then 1
+                when action = "Viewed" then 0
+                else null
+            end
+        ) * 100,
+    2),
+0)
+as ctr
+from Ads
+group by ad_id
+order by ctr desc, ad_id asc;
+
+
+---Q-21)
+Ans-
+mysql> select e1.employee_id,e2.team_size from employee e1 
+inner join (select team_id,count(employee_id) team_size from employee group by team_id) e2 on e2.team_id = e1.team_id order by e1.employee_id;
+
+mysql> select employee_id, count(employee_id) over(partition by team_id) from employee order by employee_id;
+
+
+---Q-22)
+Ans-
+select c.country_name,
+                    case 
+                        when AVG(w.weather_state*1.0) <= 15 then 'Cold'
+                        when AVG(w.weather_state*1.0) >= 25 then 'Hot'
+                        else 'Warm'
+                    end as weather_type
+from Countries as c
+inner JOIN Weather w ON c.country_id = w.country_id 
+where w.day between '2019-11-01' and '2019-11-30' 
+group by c.country_id;
+
+
+---Q22)
+Ans
+mysql> select p.product_id,round(sum(p.price*s.unit)/sum(s.unit),2) from prices p 
+inner join unitsold s
+on p.product_id = s.product_id and s.purchase_date between p.start_date and p.end_date  group by p.product_id;
++------------+------------------------------------------+
+| product_id | round(sum(p.price*s.unit)/sum(s.unit),2) |
++------------+------------------------------------------+
+|          1 |                                     6.96 |
+|          2 |                                    16.96 |
++------------+------------------------------------------+
+2 rows in set (0.00 sec)
