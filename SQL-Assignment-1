@@ -213,7 +213,7 @@ mysql> (select city,length(city) length from station_dataset order by city limit
 Q11. Query the list of CITY names starting with vowels (i.e., a, e, i, o, or u) from STATION. Your result
 cannot contain duplicates.
 Ans-
-mysql> select city from station_dataset where city rlike '^[aeiou]';
+mysql> select distinct city from station_dataset where city rlike '^[aeiou]';
 +----------------+
 | city           |
 +----------------+
@@ -231,3 +231,47 @@ mysql> select city from station_dataset where city rlike '^[aeiou]';
 | Oakfield       |
 | Elkton         |
 | East Irvine    |
+
+
+
+Q12. Query the list of CITY names ending with vowels (a, e, i, o, u) from STATION. Your result cannot
+contain duplicates.
+Ans-
+mysql> select distinct city from station_dataset where city rlike '[aeiou]$';
++-----------------+
+| city            |
++-----------------+
+| Glencoe         |
+| Chelsea         |
+| Pelahatchie     |
+| Dorrance        |
+| Cahone          |
+| Upperco         |
+| Waipahu         |
+| Millville       |
+| Aguanga         |
+
+| Morenci         |
+
+
+Q13. Query the list of CITY names from STATION that do not start with vowels. Your result cannot
+contain duplicates.
+Ans-
+mysql> select distinct city from station_dataset where city not rlike '^[aeiou]';
+mysql> select distinct city from station_dataset where city  rlike '^[^aeiou]';
+
+Q15. Query the list of CITY names from STATION that do not end with vowels. Your result cannot
+contain duplicates.
+Ans-
+mysql> select city from station_dataset where city rlike '[^aeiou]$';
+
+
+Q15. Query the list of CITY names from STATION that either do not start with vowels or do not end
+with vowels. Your result cannot contain duplicates.
+Ans-
+mysql> select distinct city from station_dataset where   not (city  rlike '^[aeiou]' and city rlike '[aeiou]$');
+
+Q16. Query the list of CITY names from STATION that do not start with vowels and do not end with
+vowels. Your result cannot contain duplicates.
+Ans-
+mysql> select distinct city from station_dataset where not (city rlike '^[aeiou]' or city rlike '[aeiou]$'); 
