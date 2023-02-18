@@ -424,3 +424,20 @@ mysql> select product_name,sum(o2.unit)  unit from product p
 ---------------------------
 Q27)
 Ans-
+
+mysql> select user_id,mail from users where  mail  RLIKE '^[a-zA-Z][a-zA-z0-9-./_]*@leetcode.com';
+-----------------------
+
+
+Q28)
+Ans-
+select o.customer_id, c.name
+from Customers c, Product p, Orders o
+where c.customer_id = o.customer_id and p.product_id = o.product_id
+group by o.customer_id
+having 
+(
+    sum(case when o.order_date like '2020-06%' then o.quantity*p.price else 0 end) >= 100
+    and
+    sum(case when o.order_date like '2020-07%' then o.quantity*p.price else 0 end) >= 100
+);
