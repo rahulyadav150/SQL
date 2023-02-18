@@ -363,7 +363,7 @@ where w.day between '2019-11-01' and '2019-11-30'
 group by c.country_id;
 
 
----Q22)
+---Q23)
 Ans
 mysql> select p.product_id,round(sum(p.price*s.unit)/sum(s.unit),2) from prices p 
 inner join unitsold s
@@ -375,3 +375,52 @@ on p.product_id = s.product_id and s.purchase_date between p.start_date and p.en
 |          2 |                                    16.96 |
 +------------+------------------------------------------+
 2 rows in set (0.00 sec)
+
+
+
+Q24) --------------
+Ans-
+mysql> select player_id,event_date firt_login from (select *, row_number() over (partition by player_id order by event_date) num from activity) derived where derived.num = 1;
++-----------+------------+
+| player_id | firt_login |
++-----------+------------+
+|         1 | 2016-03-01 |
+|         2 | 2017-06-25 |
+|         3 | 2016-03-02 |
++-----------+------------+
+3 rows in set (0.00 sec)
+
+
+--------------
+Q25)
+Ans-
+mysql> select player_id,device_id from (select *, row_number() over (partition by player_id order by event_date) num from activity) derived where derived.num = 1;
++-----------+-----------+
+| player_id | device_id |
++-----------+-----------+
+|         1 |         2 |
+|         2 |         3 |
+|         3 |         1 |
++-----------+-----------+
+3 rows in set (0.00 sec)
+
+----------------------------------
+Q26)
+Ans-
+
+mysql> select product_name,sum(o2.unit)  unit from product p 
+        inner join (select product_id, unit from orders where date_format(order_date,'%y-%m') = '20-02')o2 
+        on o2.product_id = p.product_id  
+        group by p.product_id having sum(o2.unit)>=100;
++--------------------+------+
+| product_name       | unit |
++--------------------+------+
+| leetcode solutions |  130 |
+| leetcode kit       |  100 |
++--------------------+------+
+2 rows in set (0.00 sec)
+
+
+---------------------------
+Q27)
+Ans-
