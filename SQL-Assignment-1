@@ -441,3 +441,258 @@ having
     and
     sum(case when o.order_date like '2020-07%' then o.quantity*p.price else 0 end) >= 100
 );
+
+-----------------
+
+Q29)
+Ans- 
+mysql> select distinct c.title from content c 
+inner join tvprogram p on c.content_id = p.content_id and date_format(p.program_date,'%y-%m') = '20-06' and c.kids_content = 'Y' and c.content_type = 'Movies';
+
+
+----------------------------------------
+Q30)
+Ans-
+>SELECT q.id, q.year, COALESCE(n.npv,0) AS npv
+FROM Queries q
+LEFT JOIN NPV n
+ON q.id = n.id AND q.year=n.year;
+
+
+---------------------------
+
+Q32)
+Ans- 
+mysql> select coalesce(e2.unique_id,'null'),e1.name from employees e1 left outer join employeeuni e2 on e1.id = e2.id;
+
+--------------------------------
+
+Q33)
+Ans-
+mysql> select u.name,coalesce(sum(r.distance),0) travelled_distance from users u left outer  join rides r on u.id = r.user_id group by u.id order by travelled_distance desc,u.name asc;
++----------+--------------------+
+
+Q34)
+Ans-
+select a.product_name, sum(unit) as unit
+from Products a
+left join Orders b
+on a.product_id = b.product_id
+where b.order_date between '2020-02-01' and '2020-02-29'
+group by a.product_id
+having sum(unit) >= 100;
+
+
+--------------------------------------------------------------------------------
+
+Q35)
+Ans-
+SELECT user_name AS results FROM
+(
+SELECT a.name AS user_name, COUNT(*) AS counts FROM MovieRating AS b
+    JOIN Users AS a
+    on a.user_id = b.user_id
+    GROUP BY b.user_id
+    ORDER BY counts DESC, user_name ASC LIMIT 1
+) first_query
+UNION
+SELECT movie_name AS results FROM
+(
+SELECT c.title AS movie_name, AVG(d.rating) AS rate FROM MovieRating AS d
+    JOIN Movies AS c
+    on c.movie_id = d.movie_id
+    WHERE substr(d.created_at, 1, 7) = '2020-02'
+    GROUP BY d.movie_id
+    ORDER BY rate DESC, movie_name ASC LIMIT 1
+) second_query;
+
+
+-------------------------------
+
+Q36)
+select name, sum(ifnull(distance, 0)) as travelled_distance
+from Rides r
+right join Users u
+on r.user_id = u.id
+group by name
+order by 2 desc,1 asc;
+
+
+
+----------------------------------------------
+
+Q37)
+Ans-
+select unique_id, name
+from Employees
+left join EmployeeUNI
+on if (Employees.id = EmployeeUNI.id, Employees.id, null);
+
+
+---------------------------------------------------------
+
+Q38)
+Ans-
+mysql> select s.id,s.name from students s  left outer join departments d on s.department_id = d.id   where d.name is null;
++----+---------+
+| id | name    |
++----+---------+
+|  2 | John    |
+|  3 | Steve   |
+|  4 | Jasmine |
+|  7 | Daiana  |
++----+---------+
+4 rows in set (0.00 sec)
+
+
+---------------------------------------------------------------------------------------
+
+Q39)
+Ans-
+mysql> with final_table as 
+(select case when from_id<to_id then from_id else to_id end person1,case when from_id>to_id then from_id else to_id end person2,duration from calls)
+    -> select  person1, person2,count(*) total_count,sum(duration) total_duration from final_table 
+        group by person1,person2 order by total_duration ;
+
+
+
+-----------------------------------------------------------------------------------------------
+
+Q40)
+Ans-
+select p.product_id, 
+    round(sum(p.price * u.units)/sum(u.units), 2) as average_price
+from Prices p
+left join UnitsSold u
+on p.product_id = u.product_id and 
+    datediff(u.purchase_date, p.start_date) >= 0 and
+    datediff(p.end_date, u.purchase_date) >= 0
+group by p.product_id;
+
+
+----------------------------------------------------------------------------------------------------------
+
+Q41)
+Ans-
+mysql> select name warehouse_name,sum(width*length*height*units) volume from warehouse w inner join products p on w.product_id = p.product_id group by name;
+
+
+-----------------------------------------------------------------------------------------------------
+
+Q-42)
+Ans - 
+mysql> select sale_date,
+sum(case when fruit = 'apples' then sold_num else 0 end) - sum(case when fruit = 'oranges' then sold_num else 0 end) diff
+from sales group by sale_date;
+
+
+mysql> with apples as (select sale_date,sum(sold_num) apple_count from sales where fruit = 'apples' group by sale_date),
+    -> oranges as (select sale_date,sum(sold_num) orange_count from sales where fruit = 'oranges' group by sale_date)
+    -> select a.sale_date, abs(a.apple_count - o.orange_count) diff from apples a inner join oranges o on a.sale_date  = o.sale_date;
+    
+   >select a.sale_date, (a.sold_num - b.sold_num) as diff 
+from Sales a left join Sales b
+on a.sale_date = b.sale_date
+where a.fruit = 'apples' and b.fruit = 'oranges';
+
+
+--------------------------------------------------------------------------------------------------------------------------
+Q-43)
+Ans- 
+WITH CTE AS (
+SELECT
+player_id, min(event_date) as event_start_date
+from
+Activity
+group by player_id )
+
+SELECT
+round((count(distinct c.player_id) / (select count(distinct player_id) from Activity)),2)as fraction
+FROM
+CTE c
+JOIN Activity a
+on c.player_id = a.player_id
+and datediff(c.event_start_date, a.event_date) = -1;
+
+
+------------------------------------------------------------------------------------------------------------
+
+Q44)
+Ans-
+mysql> with managers as (select managerid from employee group by managerid having count(distinct id)>=5)
+    -> select name from employee where id = (select managerid from managers);
+    
+    
+    
+    
+  -------------------------------------------------------------------------------------------------------------
+  
+  Q45)
+  Ans-
+  mysql> select dept_name,coalesce(count(student_id),0) total_student from departments d 
+  left outer join students s on d.dept_id = s.dept_id 
+  group by d.dept_id, dept_name order by total_student desc,dept_name asc;
+
+
+
+-------------------------------------------------------------------------------------------------------------------------
+ Q46)
+ Ans-
+ mysql> select  customer_id from customer group by customer_id having count(distinct product_key) = (select count(product_key) from product);
+ 
+ 
+ 
+ 
+ --------------------------------------------------------------------------------------------------------------------------
+ 
+ Q47)
+ Ans-
+ mysql> select project_id,employee_id from (select p.project_id,e.employee_id, rank() over(partition by p.project_id order by e.experience_year desc) n from employee e inner join project p on e.employee_id = p.employee_id) temp where n = 1;
+
+
+--------------------------------------------------------------------------------------------------------------------
+Q-48)
+Ans-
+select Books.book_id, name from Books join Orders
+    on Books.book_id = Orders.book_id
+    where available_from < '2019-05-23'
+    and dispatch_date between '2018-06-23' and '2019-06-23'
+    group by Books.book_id
+    having sum(quantity) < 10
+    union
+select book_id, name from Books
+    where available_from < '2019-05-23'
+    and book_id not in (
+        select distinct book_id from Orders where dispatch_date between '2018-06-23' and '2019-06-23'
+    );
+    
+    
+    
+    ---------------------------------------------------------------------------------------------------------------
+    
+    Q49)
+    Ans-
+    mysql> select student_id,course_id,grade from 
+    (select student_id,course_id, grade,row_number() over(partition by student_id order by grade desc ,course_id) n from enrollments)tmp 
+    where  n = 1;
+    
+    
+    
+    ---------------------------------------------------------------------------------------------------
+    
+    Q50)
+    Ans-
+    
+    mysql> with combined_table as (select team1 team_id, team1_goals goals from matches union select team2 team_id,team2_goals goals from matches), 
+    total_goals as (select team_id, sum(goals) sum_goals from combined_table group by team_id)
+    -> , ranking as (select  t.group_id,t.team_id,row_number() over (partition by t.group_id order by tg.sum_goals desc,t.team_id asc) n from total_goals tg inner join teams t on tg.team_id = t.team_id)
+    -> select group_id,team_id from ranking where n = 1;
+
+
+
+
+
+
+
+
+
