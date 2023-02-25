@@ -1,0 +1,2 @@
+Q) There are 2 tables,first table has 5 records and second table has 10 records. you can assume any values in each of table.
+how many maximum and minimum records possible in case of inner join,left join,right join and full outer join.
