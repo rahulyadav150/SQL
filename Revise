@@ -84,5 +84,11 @@ on t1.col1 = t2.col2 where t2.col is null; // run only one,delete all rows.
 
 delete t1 from tablename t1 inner join (select *,row_number() over(partition by colname order by colname) rn from tableanme) t2
 on t1.col = t2.col where rn >1
+-----------------------------------------------
 
+Q) create insert statement of a table containing data
+>create table testing( `name` varchar(50),age int);
+>delete from testing;
+>insert into testing values('rahul',23),('rahul',25),('rahul',26);
+>select concat('insert into testing values(',"'",name,"',",age,');') from testing;
 
