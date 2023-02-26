@@ -1,5 +1,6 @@
 Q) There are 2 tables,first table has 5 records and second table has 10 records. you can assume any values in each of table.
 how many maximum and minimum records possible in case of inner join,left join,right join and full outer join.
+-----------------------------------------------------
 
 Q) Problem with running sum
 create table t (x int);
@@ -26,3 +27,20 @@ x sum
 1	2
 2	4
 3	7
+
+
+-----------------------------------------------------
+Q) Count number of character and words in string.
+create table strings (name varchar(50));
+delete from strings;
+insert into strings values ('Ankit Bansal'),('Ram Kumar Verma'),('Akshay Kumar Ak k'),('Rahul');
+create table strings (name varchar(50));
+delete from strings;
+insert into strings values ('Ankit Bansal'),('Ram Kumar Verma'),('Akshay Kumar Ak k'),('Rahul');
+---- remove characters -------
+select name,length(name) - length(replace(name,' ','')) cnt from strings;
+
+
+-------remove words
+>select name,(length(name) - length(replace(name,'wr','')))/length(wr) as cnt from strings;
+
