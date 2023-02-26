@@ -1,3 +1,28 @@
 Q) There are 2 tables,first table has 5 records and second table has 10 records. you can assume any values in each of table.
 how many maximum and minimum records possible in case of inner join,left join,right join and full outer join.
 
+Q) Problem with running sum
+create table t (x int);
+
+delete from t;
+
+insert into t values(1),(2),(3),(1);
+
+select x, sum(x) over (order by x) from t;
+output - 
+x sum(x)
+1	2
+1	2
+2	4
+3	7
+if there are duplicates in order by then it consider both
+ so we can resolve this in two ways
+ select x, sum(x) over (order by x) from t;  adding one more column in order by so it become unique
+ 
+ select x,sum(x) over(order by x rows between unbounded preceding and current row)   // 
+ output-
+x sum 
+1	1
+1	2
+2	4
+3	7
