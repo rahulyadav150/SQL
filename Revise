@@ -168,11 +168,44 @@ select customer_id,min(order_date) first_order from customer_orders group by cus
 )
 select order_date,sum(case when order_date = first_order then 1 else 0 end) new_customers,sum(case when order_date !=first_order then 1 else 0 end) repeat_customers from customer_orders c inner join cte on c.customer_id = cte.customer_id group by order_date
 
+---------------------------------
+
+Q) find out most visited floor a each user,total visit and resource used
+create table entries ( 
+name varchar(20),
+address varchar(20),
+email varchar(20),
+floor int,
+resources varchar(10));
+
+insert into entries 
+values ('A','Bangalore','A@gmail.com',1,'CPU'),('A','Bangalore','A1@gmail.com',1,'CPU'),('A','Bangalore','A2@gmail.com',2,'DESKTOP')
+,('B','Bangalore','B@gmail.com',2,'DESKTOP'),('B','Bangalore','B1@gmail.com',2,'DESKTOP'),('B','Bangalore','B2@gmail.com',1,'MONITOR');
 
 
+with resources_count as (
+select name,count(1) total_visit,group_concat(distinct resources) resources from entries group by name
+),
+floor_count as ( select name,floor from 
+			(select name ,floor,count(1) as  count_floor_visited,row_number() over(partition by name  order by count(1) desc ) rn from entries group by name,floor)  A
+             where rn = 1
+	)
+select f.name,rc.total_visit,f.floor most_visited_floor,rc.resources from resources_count rc inner join floor_count f on f.name = rc.name;
 
 
+# name	total_visit	 most_visited_floor	  resources
+A	     3	          1	                   CPU,DESKTOP
+B	     3	          2	                   DESKTOP,MONITOR
+----------------------------------------------------------------------
 
+---------------------------------------------------------------------------------------
+
+Q) find date for nth sunday from now
+Ans-
+set @n = 3;
+set @d = '2023-02-26';
+
+select date_add(@d,interval 7 - (weekday(@d)+1)%7 + 7*(@n-1)   day) nth_sunday;
 
 
 
