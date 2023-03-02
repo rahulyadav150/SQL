@@ -208,10 +208,64 @@ set @d = '2023-02-26';
 select date_add(@d,interval 7 - (weekday(@d)+1)%7 + 7*(@n-1)   day) nth_sunday;
 
 
+----------------------------------------------------------------------
+
+Q) Given task and their state for each day,return output in continuous form
+use test;
+SET SQL_SAFE_UPDATES = 0;
+create table tasks (
+date_value date,
+state varchar(10)
+);
+
+insert into tasks  values ('2019-01-01','success'),('2019-01-02','success'),('2019-01-03','success'),('2019-01-04','fail')
+,('2019-01-05','fail'),('2019-01-06','success');
+with cte as(
+select date_value,state,row_number() over(order by date_value) base_rn,row_number() over(partition by state order by date_value) rn 
+ from tasks
+ )
+ select min(date_value) start_date,max(date_value) end_date ,state from cte group by base_rn - rn,state order by start_date;
+ te;
+ 
+ output-
+ # start_date	end_date	state
+2019-01-01	2019-01-03	success
+2019-01-04	2019-01-05	fail
+2019-01-06	2019-01-06	success
+
+-------------------------------------------------------------------
+
+Q) Given average daily sale for each product and period start and end date, generate report year wise
+
+use test;
+SET SQL_SAFE_UPDATES = 0;
+
+
+create table sales (
+product_id int,
+period_start date,
+period_end date,
+average_daily_sales int
+);
+
+insert into sales values(1,'2019-01-25','2019-02-28',100),(2,'2018-12-01','2020-01-01',10),(3,'2019-12-01','2020-01-31',1);
+
+with recursive cte as(
+select * from sales
+union all
+select product_id,date_add(period_start,interval 1 day),period_end,average_daily_sales from cte where period_start<period_end
+)
+select product_id,date_format(period_start,'%Y'),sum(average_daily_sales) from cte group by product_id,date_format(period_start,'%Y') order by product_id
 
 
 
-
+output-
+# product_id	year	total_sale
+2	2018	310
+2	2019	3650
+2	2020	10
+3	2019	31
+3	2020	31
 
 
 
