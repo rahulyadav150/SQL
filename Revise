@@ -312,5 +312,71 @@ bill_rate from billings
 select cte.emp_name ,ifnull(sum(cte.bill_rate*hw.bill_hrs),0) amount  from cte  left  join hoursWorked hw on hw.emp_name = cte.emp_name and work_date  between bill_date and expire_date group by cte.emp_name;
 
 
+-----------------------------------------------
+Q) Find three consecutive Empty Seats.
+Ans-
+use test;
+set SQL_safe_updates = 0;
+
+
+
+create table bms (seat_no int ,is_empty varchar(10));
+insert into bms values
+(1,'N')
+,(2,'Y')
+,(3,'N')
+,(4,'Y')
+,(5,'Y')
+,(6,'Y')
+,(7,'N')
+,(8,'Y')
+,(9,'Y')
+,(10,'Y')
+,(11,'Y')
+,(12,'N')
+,(13,'Y')
+,(14,'Y');
+
+
+--------First Approach-------------
+with cte as (
+select * from (
+select seat_no, lag(is_empty) over(order by seat_no) pre_seat,
+				is_empty,lead(is_empty) over(order by seat_no) next_seat 
+from  bms) a where pre_seat = 'Y' and is_empty ='Y' and next_seat = 'Y'
+)
+select distinct bms.seat_no,bms.is_empty from bms inner join cte  on abs(bms.seat_no - cte.seat_no) <=1;
+
+
+--------Second Approach-----------
+with cte_rn as(
+select seat_no,is_empty,row_number() over(partition by is_empty order by seat_no) rn from bms
+),
+cte_diff as(select (seat_no-rn) diff from cte_rn
+ where is_empty = 'Y' group by  (seat_no-rn) having count(1)>=3
+)
+select cte_rn.seat_no from cte_rn inner join cte_diff on  (cte_rn.seat_no-cte_rn.rn) = cte_diff.diff
+
+-------Third Approach----------
+select seat_no from (
+select seat_no,sum(case when is_empty = 'Y' then 1 else 0 end) over(order by seat_no rows between 2 preceding and current row) pre2,
+		sum(case when is_empty = 'Y' then 1 else 0 end) over(order by seat_no rows between 1 preceding and 1 following) current,
+        sum(case when is_empty = 'Y' then 1 else 0 end) over(order by seat_no rows between current row and 2 following) next2
+from bms )a where pre2  = 3 or current = 3 or next2 = 3
+
+
+------output--------
+
+# seat_no
+4
+5
+6
+8
+9
+10
+11
+
+
+---------------------
 
 
