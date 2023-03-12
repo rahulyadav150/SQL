@@ -380,3 +380,63 @@ from bms )a where pre2  = 3 or current = 3 or next2 = 3
 ---------------------
 
 
+Q) find out products customer can purchase,products with low cost are prioritized.
+create table products
+(
+product_id varchar(20) ,
+cost int
+);
+insert into products values ('P1',200),('P2',300),('P3',500),('P4',800);
+
+create table customer_budget
+(
+customer_id int,
+budget int
+);
+
+insert into customer_budget values (100,400),(200,800),(300,1500);
+
+with cte as (
+select *,sum(cost) over(order by cost) rolling_sum from products
+)
+select customer_id, group_concat(product_id) from cte inner join customer_budget cb on cb.budget>cte.rolling_sum group by customer_id;
+
+output-
+# customer_id	group_concat(product_id)
+100	P1
+200	P1,P2
+300	P1,P2,P3
+-------------------------------------------------------------------
+
+Q) find out total msg exchange between each user for each day
+CREATE TABLE subscriber (
+ sms_date date ,
+ sender varchar(20) ,
+ receiver varchar(20) ,
+ sms_no int
+);
+-- insert some values
+INSERT INTO subscriber VALUES ('2020-4-1', 'Avinash', 'Vibhor',10);
+INSERT INTO subscriber VALUES ('2020-4-1', 'Vibhor', 'Avinash',20);
+INSERT INTO subscriber VALUES ('2020-4-1', 'Avinash', 'Pawan',30);
+INSERT INTO subscriber VALUES ('2020-4-1', 'Pawan', 'Avinash',20);
+INSERT INTO subscriber VALUES ('2020-4-1', 'Vibhor', 'Pawan',5);
+INSERT INTO subscriber VALUES ('2020-4-1', 'Pawan', 'Vibhor',8);
+INSERT INTO subscriber VALUES ('2020-4-1', 'Vibhor', 'Deepak',50);
+
+
+with cte as(
+select sms_date,(case when sender<receiver then sender else receiver end) sender,
+		(case when sender>=receiver then sender else receiver end ) receiver,sms_no
+from subscriber
+)
+select sms_date,sender,receiver,sum(sms_no) as total_msg from cte group by sms_date,sender,receiver
+
+output-
+# sms_date	sender	receiver	total_msg
+2020-04-01	Avinash	Vibhor	30
+2020-04-01	Avinash	Pawan	50
+2020-04-01	Pawan	Vibhor	13
+2020-04-01	Deepak	Vibhor	50
+
+
