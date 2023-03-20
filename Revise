@@ -476,4 +476,53 @@ select distinct o1.* from int_orders o1 left join int_orders o2 on o1.salesperso
 60	1998-03-02	6	7	720
 20	1999-01-30	4	8	1800
 
+-----------------------------------------------
+
+Q) Write a Query to display the records which have 3 or more consecutive rows with the amount of people more than 100 each day inclusive.
+
+
+----First Approach---------
+
+with cte1 as(
+select *,row_number() over(order by visit_date) rn from stadium where no_of_people>=100
+),
+cte2 as(
+select id-rn diff from cte1 group by id-rn having count(1)>=3
+)
+select id,visit_date,no_of_people from cte1 inner join cte2 on id-rn = diff;
+
+
+-----Second Approch-----
+select id,visit_date,no_of_people from(
+select *,sum(case when no_of_people>=100 then 1 end) over(order by visit_date rows between 2 preceding and current row) pre2,
+	sum(case when no_of_people>=100 then 1 end) over(order by visit_date rows between 1 preceding and 1 following) cur,
+    sum(case when no_of_people>=100 then 1 end) over(order by visit_date rows between current row and 2 following ) next2
+from stadium
+)A where pre2 = 3 or cur = 3  or next2 = 3
+
+
+------------------------------------------------------------------
+
+Q) Write a SQL to idetify yearwise count of new cities where compny started their operation.
+create table business_city (
+business_date date,
+city_id int
+);
+delete from business_city;
+insert into business_city
+values(cast('2020-01-02' as date),3),(cast('2020-07-01' as date),7),(cast('2021-01-01' as date),3),(cast('2021-02-03' as date),19)
+,(cast('2022-12-01' as date),3),(cast('2022-12-15' as date),3),(cast('2022-02-28' as date),12);
+select * from business_city;
+
+
+>select year(bc1.business_date) year ,count(1) from business_city bc1 left join business_city bc2 
+on bc1.business_date>bc2.business_date and bc1.city_id = bc2.city_id where bc2.city_id is null
+group by year(bc1.business_date) order by year;
+
+# year	count(1)
+2020	2
+2021	1
+2022	1
+
+
 
